@@ -106,7 +106,6 @@ const getAllProperties = function (options, limit = 10) {
   SELECT properties.*, avg(property_reviews.rating) as average_rating
   FROM properties
   JOIN property_reviews ON properties.id = property_id
-
   `;
 
   if (
@@ -161,7 +160,6 @@ exports.getAllProperties = getAllProperties;
  * @return {Promise<{}>} A promise to the property.
  */
 const addProperty = function (property) {
-  console.log(property);
   const queryParams = [
     property.owner_id,
     property.title,
@@ -188,9 +186,5 @@ const addProperty = function (property) {
   return pool
     .query(queryString, queryParams)
     .then((results) => results.rows[0]);
-  // const propertyId = Object.keys(properties).length + 1;
-  // property.id = propertyId;
-  // properties[propertyId] = property;
-  // return Promise.resolve(property);
 };
 exports.addProperty = addProperty;
