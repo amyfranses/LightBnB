@@ -47,7 +47,7 @@ Using complex SQL queries, database and ERD (entity relationship diagram) design
   - `json` is a directory that contains a bunch of dummy data in `.json` files.
   - `database.js` is responsible for all queries to the database. It doesn't currently connect to any database, all it does is return data from `.json` files.
 
-  ## Getting Started
+## Getting Started
 
 1. Install dependencies using the npm install command.
 2. Start the web server using the npm run local command. The app will be served at http://localhost:3000

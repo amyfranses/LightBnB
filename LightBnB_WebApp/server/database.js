@@ -10,6 +10,11 @@ const pool = new Pool({
   database: "lightbnb",
 });
 
+const toCents = function (amount) {
+  const parsedAmount = parseInt(amount, 10);
+  return parsedAmount * 100;
+};
+
 // the following assumes that you named your connection variable `pool`
 pool.query(`SELECT title FROM properties LIMIT 10;`).then((response) => {});
 
@@ -101,7 +106,7 @@ exports.getAllReservations = getAllReservations;
  */
 const getAllProperties = function (options, limit = 10) {
   const queryParams = [];
-
+  console.log("options", options);
   let queryString = `
   SELECT properties.*, avg(property_reviews.rating) as average_rating
   FROM properties
@@ -122,18 +127,34 @@ const getAllProperties = function (options, limit = 10) {
     if (options.owner_id) {
       if (queryParams.length >= 1) queryString += `AND `;
       queryParams.push(options.owner_id);
-      queryString += `owner_id = $${queryParams.length} `;
+      if (!options.city) {
+        queryString += `WHERE owner_id = $${queryParams.length} `;
+      } else {
+        queryString += `owner_id = $${queryParams.length} `;
+      }
     }
 
     if (options.minimum_price_per_night) {
       if (queryParams.length >= 1) queryString += `AND `;
-      queryParams.push(options.minimum_price_per_night);
-      queryString += `cost_per_night >= $${queryParams.length} `;
+      queryParams.push(toCents(options.minimum_price_per_night));
+      if (!options.city && !options.owner_id) {
+        queryString += `WHERE cost_per_night >= $${queryParams.length} `;
+      } else {
+        queryString += `cost_per_night >= $${queryParams.length} `;
+      }
     }
     if (options.maximum_price_per_night) {
       if (queryParams.length >= 1) queryString += `AND `;
-      queryParams.push(options.maximum_price_per_night);
-      queryString += `cost_per_night <= $${queryParams.length} `;
+      queryParams.push(toCents(options.maximum_price_per_night));
+      if (
+        !options.city &&
+        !options.owner_id &&
+        !options.minimum_price_per_night
+      ) {
+        queryString += `WHERE cost_per_night <= $${queryParams.length} `;
+      } else {
+        queryString += `cost_per_night <= $${queryParams.length} `;
+      }
     }
   }
 
@@ -148,8 +169,9 @@ const getAllProperties = function (options, limit = 10) {
 
   queryParams.push(limit);
   queryString += `LIMIT $${queryParams.length};`;
-
-  return pool.query(queryString, queryParams).then((results) => res.rows);
+  console.log("queryString", queryString);
+  console.log("queryParams", queryParams);
+  return pool.query(queryString, queryParams).then((results) => results.rows);
 };
 
 exports.getAllProperties = getAllProperties;
