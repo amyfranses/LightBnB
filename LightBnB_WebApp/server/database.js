@@ -10,6 +10,7 @@ const pool = new Pool({
   database: "lightbnb",
 });
 
+// helper function to convert dollar amount input into cents to query database
 const toCents = function (amount) {
   const parsedAmount = parseInt(amount, 10);
   return parsedAmount * 100;
@@ -106,7 +107,7 @@ exports.getAllReservations = getAllReservations;
  */
 const getAllProperties = function (options, limit = 10) {
   const queryParams = [];
-  console.log("options", options);
+
   let queryString = `
   SELECT properties.*, avg(property_reviews.rating) as average_rating
   FROM properties
@@ -169,8 +170,7 @@ const getAllProperties = function (options, limit = 10) {
 
   queryParams.push(limit);
   queryString += `LIMIT $${queryParams.length};`;
-  console.log("queryString", queryString);
-  console.log("queryParams", queryParams);
+
   return pool.query(queryString, queryParams).then((results) => results.rows);
 };
 
